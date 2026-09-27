@@ -40,7 +40,10 @@ class TicketHandler(BaseHTTPRequestHandler):
             show=self.find_show(show_id)
             if show is None:
                 return self.send_json(404,{"error":"show not found"})
-            seld.send_json(200,show)
+            self.send_json(200,show)
+            
+        elif self.path == "/bookings":
+            self.send_json(200, BOOKINGS)
             
         else:
             self.send_json(404,{"error":"rote not found"})
