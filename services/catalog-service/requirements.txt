@@ -1,2 +1,3 @@
-   fastapi[standard]
-   psycopg[binary]
+fastapi[standard]
+psycopg[binary,pool]
+pydantic-settings
