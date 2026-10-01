@@ -1,7 +1,8 @@
 from fastapi import FastAPI,HTTPException
 from app.db import pool
 from contextlib import asynccontextmanager
-from app.routers import movies
+
+from app.routers import movies, shows
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -13,6 +14,7 @@ async def lifespan(app:FastAPI):
 
 app=FastAPI(title="TicketRush Catalog Service", lifespan=lifespan)
 app.include_router(movies.router)
+app.include_router(shows.router)
 
 @app.get("/health")
 def health():
