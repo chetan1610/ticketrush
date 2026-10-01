@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel
-
+from pydantic import AwareDatetime, BaseModel, Field
 
 class ShowOut(BaseModel):
     id: int
@@ -19,3 +19,9 @@ class ShowOut(BaseModel):
 class ShowPage(BaseModel):
     items: list[ShowOut]
     next_cursor: str | None
+    
+class ShowCreate(BaseModel):
+    movie_id: int
+    screen_id: int
+    starts_at: AwareDatetime
+    price: Decimal = Field(ge=0, max_digits=8, decimal_places=2)

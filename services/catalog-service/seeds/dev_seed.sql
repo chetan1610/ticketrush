@@ -39,7 +39,7 @@ ORDER BY v.id,n;
 
 
 INSERT INTO seats (screen_id,row_label,seat_number)
-SElECT s.id,chr(64+r),n
+SELECT s.id,chr(64+r),n
 FROM screens s
 CROSS JOIN generate_series(1,8) AS r
 CROSS JOIN generate_series(1,12) AS n
