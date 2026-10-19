@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas.shows import ShowCreate, ShowOut, ShowPage
+from app.schemas.shows import SeatOut, ShowCreate, ShowOut, ShowPage
 from app.services import shows as show_service
 
 router = APIRouter(prefix="/shows", tags=["shows"])
@@ -25,6 +25,14 @@ def list_shows(
 def get_show(show_id: int):
     try:
         return show_service.get_show(show_id)
+    except show_service.ShowNotFound:
+        raise HTTPException(status_code=404, detail="show not found")
+
+
+@router.get("/{show_id}/seats", response_model=list[SeatOut])
+def list_seats(show_id: int):
+    try:
+        return show_service.list_seats(show_id)
     except show_service.ShowNotFound:
         raise HTTPException(status_code=404, detail="show not found")
 
