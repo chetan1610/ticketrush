@@ -66,11 +66,14 @@ uvicorn app.main:app --port 8001        # booking: --port 8002
 # user-service
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py createsuperuser        # optional: Django admin at /admin/
 python manage.py runserver 8000
 
 # payment-service / notification-service
 mvn spring-boot:run
 ```
+
+user-service uses a custom user model (email login). If your users database was migrated before that model existed, `migrate` fails with `InconsistentMigrationHistory`. Drop and recreate that database, then run `migrate` again.
 
 ## API cheat sheet
 

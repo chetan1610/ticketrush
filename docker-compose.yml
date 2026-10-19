@@ -32,8 +32,12 @@ services:
     build: ./services/user-service
     environment:
       <<: *secrets
-      DATABASE_URL: postgresql://ticketrush:ticketrush@postgres:5432/users
       DJANGO_SECRET_KEY: dev-django-secret
+      DB_NAME: users
+      DB_USER: ticketrush
+      DB_PASSWORD: ticketrush
+      DB_HOST: postgres
+      DB_PORT: "5432"
     ports: ["8000:8000"]
     depends_on:
       postgres: {condition: service_healthy}
