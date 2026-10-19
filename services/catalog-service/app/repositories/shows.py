@@ -49,3 +49,17 @@ def create_show(movie_id, screen_id, starts_at, price):
              "starts_at": starts_at, "price": price},
         ).fetchone()
     return row["id"]
+
+
+def list_seats_for_show(show_id):
+    with pool.connection() as conn:
+        return conn.execute(
+            """
+            SELECT se.id, se.row_label, se.seat_number
+            FROM shows sh
+            JOIN seats se ON se.screen_id = sh.screen_id
+            WHERE sh.id = %(id)s
+            ORDER BY se.row_label, se.seat_number
+            """,
+            {"id": show_id},
+        ).fetchall()

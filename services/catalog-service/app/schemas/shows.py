@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel
 from pydantic import AwareDatetime, BaseModel, Field
 
 class ShowOut(BaseModel):
@@ -25,3 +24,9 @@ class ShowCreate(BaseModel):
     screen_id: int
     starts_at: AwareDatetime
     price: Decimal = Field(ge=0, max_digits=8, decimal_places=2)
+
+
+class SeatOut(BaseModel):
+    id: int
+    row_label: str
+    seat_number: int

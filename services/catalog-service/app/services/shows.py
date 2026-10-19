@@ -83,3 +83,8 @@ def create_show(data):
         raise ShowSlotTaken()
 
     return show_repo.get_show(show_id)
+
+
+def list_seats(show_id):
+    get_show(show_id)
+    return show_repo.list_seats_for_show(show_id)

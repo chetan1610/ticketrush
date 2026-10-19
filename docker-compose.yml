@@ -1,0 +1,89 @@
+# Whole platform in one command:  docker compose up --build
+# Ports: user 8000, catalog 8001, booking 8002, payment 8003,
+#        notification 8004, Mailpit inbox http://localhost:8025
+
+x-secrets: &secrets
+  JWT_SECRET: dev-jwt-secret-please-change-0123456789
+  INTERNAL_TOKEN: dev-internal-token
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ticketrush
+      POSTGRES_PASSWORD: ticketrush
+    ports: ["5433:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - ./services/catalog-service/migrations:/migrations/catalog:ro
+      - ./services/catalog-service/seeds:/seeds/catalog:ro
+      - ./services/booking-service/migrations:/migrations/booking:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketrush -d bookings"]
+      interval: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ["8025:8025"]
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      <<: *secrets
+      DATABASE_URL: postgresql://ticketrush:ticketrush@postgres:5432/users
+      DJANGO_SECRET_KEY: dev-django-secret
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  catalog-service:
+    build: ./services/catalog-service
+    environment:
+      DATABASE_URL: postgresql://ticketrush:ticketrush@postgres:5432/catalog
+    ports: ["8001:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  booking-service:
+    build: ./services/booking-service
+    environment:
+      <<: *secrets
+      DATABASE_URL: postgresql://ticketrush:ticketrush@postgres:5432/bookings
+      CATALOG_URL: http://catalog-service:8000
+    ports: ["8002:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  payment-service:
+    build: ./services/payment-service
+    environment:
+      <<: *secrets
+      PORT: "8080"
+      DATABASE_URL: jdbc:postgresql://postgres:5432/payments
+      DATABASE_USER: ticketrush
+      DATABASE_PASSWORD: ticketrush
+      BOOKING_URL: http://booking-service:8000
+      NOTIFICATION_URL: http://notification-service:8080
+    ports: ["8003:8080"]
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  notification-service:
+    build: ./services/notification-service
+    environment:
+      INTERNAL_TOKEN: dev-internal-token
+      PORT: "8080"
+      DATABASE_URL: jdbc:postgresql://postgres:5432/notifications
+      DATABASE_USER: ticketrush
+      DATABASE_PASSWORD: ticketrush
+      CATALOG_URL: http://catalog-service:8000
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    ports: ["8004:8080"]
+    depends_on:
+      postgres: {condition: service_healthy}
+
+volumes:
+  pgdata:
